@@ -5,7 +5,7 @@ Marketing site + interactive playground for [Gitbun](https://github.com/nirvik34
 ## Stack
 
 - **Next.js 15** — App Router, TypeScript
-- **Gemini 1.5 Flash** — AI commit generation via `@google/generative-ai`
+- **Gemini 1.5 Flash** — AI commit generation through a server-side API route
 - **Rule-based fallback** — offline mode, no API key needed
 
 ## Getting Started
@@ -25,10 +25,10 @@ cp .env.local.example .env.local
 Then edit `.env.local` and paste your key:
 
 ```
-NEXT_PUBLIC_GEMINI_API_KEY=your_key_here
+GEMINI_API_KEY=your_key_here
 ```
 
-Get a free key at [aistudio.google.com](https://aistudio.google.com). Gemini 1.5 Flash is free up to 15 requests/min.
+Get a free key at [aistudio.google.com](https://aistudio.google.com). Keep this key server-side only; do not prefix it with `NEXT_PUBLIC_`.
 
 ### 3. Run the dev server
 
@@ -51,7 +51,7 @@ src/
 │   ├── sections/         # Hero, Playground, Features, Docs, GitHubSection
 │   └── ui/               # TerminalWindow, TypeBadge, CopyButton, GrainOverlay
 ├── constants/            # Static data (flags, commits, terminal lines, colors)
-├── lib/                  # generateCommit, gemini, ruleBased
+├── lib/                  # generateCommit, gemini, ruleBased, validation, prompt safety
 └── styles/               # palette.ts color tokens
 ```
 
