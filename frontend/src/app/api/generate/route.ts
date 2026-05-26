@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { isIP } from "node:net";
 import { NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { formatUntrustedPromptBlock, sanitizePrompt } from "@/lib/sanitizePrompt";
@@ -13,6 +14,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const MODEL_NAME = "gemini-1.5-flash";
+const GEMINI_TIMEOUT_MS = 15_000;
 
 export async function POST(request: Request) {
   let payload: unknown;
@@ -67,8 +69,21 @@ export function GET() {
 async function generateWithGemini(apiKey: string, sanitizedDiff: string): Promise<string> {
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ model: MODEL_NAME });
-  const result = await model.generateContent(buildCommitPrompt(sanitizedDiff));
-  return result.response.text();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), GEMINI_TIMEOUT_MS);
+
+  try {
+    const result = await model.generateContent(buildCommitPrompt(sanitizedDiff), {
+      timeout: GEMINI_TIMEOUT_MS,
+      signal: controller.signal,
+    });
+    return result.response.text();
+  } finally {
+    clearTimeout(timeout);
+    if (!controller.signal.aborted) {
+      controller.abort();
+    }
+  }
 }
 
 function buildCommitPrompt(sanitizedDiff: string): string {
@@ -106,8 +121,34 @@ function parseGeminiCommit(text: string) {
 }
 
 function getClientIdentifier(request: Request): string {
-  const forwardedFor = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  return forwardedFor || request.headers.get("x-real-ip") || "anonymous";
+  const remoteAddress = getServerRemoteAddress(request);
+  if (isValidIp(remoteAddress)) {
+    return remoteAddress;
+  }
+
+  if (process.env.PROXY_TRUSTED === "true") {
+    const forwardedFor = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+    if (isValidIp(forwardedFor)) {
+      return forwardedFor;
+    }
+  }
+
+  const realIp = request.headers.get("x-real-ip")?.trim();
+  return isValidIp(realIp) ? realIp : "anonymous";
+}
+
+function getServerRemoteAddress(request: Request): string | undefined {
+  const nodeRequest = request as Request & {
+    ip?: string;
+    socket?: { remoteAddress?: string };
+    connection?: { remoteAddress?: string };
+  };
+
+  return nodeRequest.ip ?? nodeRequest.socket?.remoteAddress ?? nodeRequest.connection?.remoteAddress;
+}
+
+function isValidIp(value: string | undefined): value is string {
+  return typeof value === "string" && isIP(value) !== 0;
 }
 
 function errorResponse(

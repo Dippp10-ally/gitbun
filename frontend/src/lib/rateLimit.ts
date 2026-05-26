@@ -35,9 +35,11 @@ export function checkRateLimit(
 
   const key = identifier || "anonymous";
   const existing = buckets.get(key);
-  const bucket = !existing || existing.resetAt <= now
-    ? { count: 0, resetAt: now + config.windowMs, blockedUntil: 0 }
-    : existing;
+  const bucket = existing?.blockedUntil && existing.blockedUntil > now
+    ? existing
+    : !existing || existing.resetAt <= now
+      ? { count: 0, resetAt: now + config.windowMs, blockedUntil: 0 }
+      : existing;
 
   if (bucket.blockedUntil > now) {
     buckets.set(key, bucket);

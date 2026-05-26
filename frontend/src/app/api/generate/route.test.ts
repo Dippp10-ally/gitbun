@@ -18,6 +18,7 @@ describe("/api/generate", () => {
     vi.clearAllMocks();
     resetRateLimit();
     process.env.GEMINI_API_KEY = "server-secret";
+    delete process.env.PROXY_TRUSTED;
     delete process.env.AI_RATE_LIMIT_MAX;
     delete process.env.AI_RATE_LIMIT_WINDOW_MS;
     delete process.env.AI_RATE_LIMIT_COOLDOWN_MS;
@@ -52,6 +53,8 @@ describe("/api/generate", () => {
       },
     });
     expect(generateContentMock.mock.calls[0][0]).not.toContain("server-secret");
+    expect(generateContentMock.mock.calls[0][1]).toMatchObject({ timeout: 15_000 });
+    expect(generateContentMock.mock.calls[0][1].signal).toBeInstanceOf(AbortSignal);
   });
 
   it("sanitizes injection attempts before calling Gemini", async () => {
@@ -125,15 +128,61 @@ describe("/api/generate", () => {
     expect(limited.status).toBe(429);
     expect(limited.headers.get("Retry-After")).toBe("60");
   });
+
+  it("does not trust spoofed x-forwarded-for unless proxy trust is enabled", async () => {
+    const { POST } = await import("./route");
+    process.env.AI_RATE_LIMIT_MAX = "1";
+    generateContentMock.mockResolvedValue({
+      response: {
+        text: () => JSON.stringify({
+          type: "chore",
+          scope: null,
+          subject: "update codebase",
+          body: [],
+          confidence: 80,
+        }),
+      },
+    });
+
+    expect((await POST(request({ prompt: "diff one" }, "198.51.100.1", "203.0.113.1"))).status).toBe(200);
+    const limited = await POST(request({ prompt: "diff two" }, "198.51.100.1", "203.0.113.2"));
+
+    expect(limited.status).toBe(429);
+  });
+
+  it("uses a valid x-forwarded-for value when proxy trust is enabled", async () => {
+    const { POST } = await import("./route");
+    process.env.PROXY_TRUSTED = "true";
+    process.env.AI_RATE_LIMIT_MAX = "1";
+    generateContentMock.mockResolvedValue({
+      response: {
+        text: () => JSON.stringify({
+          type: "chore",
+          scope: null,
+          subject: "update codebase",
+          body: [],
+          confidence: 80,
+        }),
+      },
+    });
+
+    expect((await POST(request({ prompt: "diff one" }, undefined, "203.0.113.1"))).status).toBe(200);
+    expect((await POST(request({ prompt: "diff two" }, undefined, "203.0.113.2"))).status).toBe(200);
+  });
 });
 
-function request(body: unknown, ip = "127.0.0.1") {
+function request(body: unknown, realIp: string | undefined = "127.0.0.1", forwardedFor?: string) {
+  const headers = new Headers({ "Content-Type": "application/json" });
+  if (realIp) {
+    headers.set("x-real-ip", realIp);
+  }
+  if (forwardedFor) {
+    headers.set("x-forwarded-for", forwardedFor);
+  }
+
   return new Request("http://localhost/api/generate", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-forwarded-for": ip,
-    },
+    headers,
     body: JSON.stringify(body),
   });
 }

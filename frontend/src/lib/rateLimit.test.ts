@@ -29,4 +29,12 @@ describe("rate limiting", () => {
     expect(checkRateLimit("127.0.0.1", 0, config).allowed).toBe(true);
     expect(checkRateLimit("127.0.0.1", 1_001, config).allowed).toBe(true);
   });
+
+  it("honors cooldown even when it lasts longer than the window", () => {
+    const config = { windowMs: 1_000, maxRequests: 1, cooldownMs: 5_000 };
+
+    expect(checkRateLimit("127.0.0.1", 0, config).allowed).toBe(true);
+    expect(checkRateLimit("127.0.0.1", 100, config).allowed).toBe(false);
+    expect(checkRateLimit("127.0.0.1", 1_100, config).allowed).toBe(false);
+  });
 });
