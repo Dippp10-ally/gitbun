@@ -18,6 +18,53 @@ interface Bucket {
 
 const buckets = new Map<string, Bucket>();
 
+// Regex for a bare IPv4 or IPv6 address (no port, no CIDR).
+const IP_RE =
+  /^(?:(?:\d{1,3}\.){3}\d{1,3}|(?:[0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}|::(?:[fF]{4}:)?\d{1,3}(?:\.\d{1,3}){3})$/;
+
+/** Returns true for a syntactically valid IP address (v4 or v6). */
+function isValidIp(value: string): boolean {
+  return IP_RE.test(value.trim());
+}
+
+/**
+ * Resolves a rate-limit identifier from a request-like object.
+ *
+ * - When `PROXY_TRUSTED !== "true"` the `x-forwarded-for` header is ignored
+ *   entirely; only the server-derived connection IP is used.
+ * - When `PROXY_TRUSTED === "true"` the leftmost valid IP in
+ *   `x-forwarded-for` is used, falling back to the connection IP.
+ *
+ * Falls back to `"anonymous"` when no usable identifier can be found.
+ */
+export function resolveIdentifier(
+  request: { headers: { get(name: string): string | null }; ip?: string },
+  env: NodeJS.ProcessEnv = process.env,
+): string {
+  const proxyTrusted = env.PROXY_TRUSTED === "true";
+
+  if (proxyTrusted) {
+    const forwarded = request.headers.get("x-forwarded-for");
+    if (forwarded) {
+      // The header may contain a comma-separated chain of IPs added by
+      // successive proxies.  The *leftmost* entry is the original client IP.
+      const candidate = forwarded.split(",")[0].trim();
+      if (isValidIp(candidate)) {
+        return candidate;
+      }
+      // Header was present but malformed / invalid — fall through to
+      // server-derived IP rather than trusting garbage data.
+    }
+  }
+  // Proxy trust disabled: ignore x-forwarded-for completely.
+
+  if (request.ip && isValidIp(request.ip)) {
+    return request.ip;
+  }
+
+  return "anonymous";
+}
+
 export function getRateLimitConfig(env: NodeJS.ProcessEnv = process.env): RateLimitConfig {
   return {
     windowMs: positiveInt(env.AI_RATE_LIMIT_WINDOW_MS, 60_000),
@@ -35,11 +82,26 @@ export function checkRateLimit(
 
   const key = identifier || "anonymous";
   const existing = buckets.get(key);
-  const bucket = existing?.blockedUntil && existing.blockedUntil > now
-    ? existing
-    : !existing || existing.resetAt <= now
-      ? { count: 0, resetAt: now + config.windowMs, blockedUntil: 0 }
-      : existing;
+
+  // --- Issue 2 fix: check blockedUntil BEFORE deciding whether to reset ---
+  //
+  // Old logic reset the bucket whenever `resetAt <= now`, which let a blocked
+  // user bypass their cooldown simply by waiting for the rate window to expire.
+  //
+  // Correct logic:
+  //   1. If still blocked → keep the existing bucket as-is.
+  //   2. Else if the window has expired (AND the block has expired) → fresh bucket.
+  //   3. Otherwise → continue with the existing bucket.
+  let bucket: Bucket;
+  if (existing && existing.blockedUntil > now) {
+    // Still in cooldown — never reset, always return the existing bucket.
+    bucket = existing;
+  } else if (!existing || (existing.resetAt <= now && existing.blockedUntil <= now)) {
+    // No bucket yet, or both the window AND the cooldown have expired → reset.
+    bucket = { count: 0, resetAt: now + config.windowMs, blockedUntil: 0 };
+  } else {
+    bucket = existing;
+  }
 
   if (bucket.blockedUntil > now) {
     buckets.set(key, bucket);
