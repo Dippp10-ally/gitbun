@@ -25,6 +25,7 @@ import { isOllamaRunning, getBestModel } from "./llm/checkOllama";
 import { analyzeSemanticChanges } from "./analyzer/semanticAnalyzer";
 import { SemanticEvent } from "./analyzer/semanticTypes";
 import { ValidationError, CancellationError } from "./utils/errors";
+import { colorizeCommitMessage } from "./utils/commitColors";
 
 interface CliOptions {
   ai?: boolean;
@@ -218,7 +219,7 @@ export async function run(options: CliOptions) {
 
   // Dry run
   if (options.dryRun) {
-    console.log("\n" + commitMessage + "\n");
+    console.log("\n" + colorizeCommitMessage(commitMessage) + "\n");
     process.exit(0);
   }
 
