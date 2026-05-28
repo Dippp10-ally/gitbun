@@ -1,4 +1,5 @@
 import type { FileChange } from "./fileFilter";
+import pathModule from 'path';
 
 export type FileGroup = {
   representative: FileChange;
@@ -36,12 +37,16 @@ function buildGroupLabel(directory: string, extension: string): string {
     return extension ? `*${extension}` : "*";
   }
 
-  return extension ? `${directory}/*${extension}` : `${directory}/*`;
+  // Ensure the directory uses standard forward slashes if it comes from Windows backslashes
+  const cleanDirectory = directory.replace(/\\/g, '/');
+
+  // Explicitly construct the display label using standard forward slashes
+  return extension ? `${cleanDirectory}/*${extension}` : `${cleanDirectory}/*`;
 }
 
 export function getExtension(path: string): string {
   const normalized = normalizePath(path);
-  const fileName = normalized.split("/").pop() || "";
+  const fileName = pathModule.basename(normalized);
   const lastDot = fileName.lastIndexOf(".");
 
   return lastDot <= 0 ? "" : fileName.slice(lastDot).toLowerCase();

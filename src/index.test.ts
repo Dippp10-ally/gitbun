@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { detectScope } from './analyzer/scopeDetector';
+import { ValidationError, CancellationError } from './utils/errors';
 
 describe('detectScope', () => {
     it('should detect scope from src directory', () => {
@@ -15,5 +16,19 @@ describe('detectScope', () => {
     it('should pick the most frequent scope', () => {
         const files = ['src/analyzer/f1.ts', 'src/ui/f2.ts', 'src/ui/f3.ts'];
         expect(detectScope(files)).toBe('ui');
+    });
+});
+
+describe('Errors', () => {
+    it('should create ValidationError with correct name and message', () => {
+        const error = new ValidationError('test error');
+        expect(error.name).toBe('ValidationError');
+        expect(error.message).toBe('test error');
+    });
+
+    it('should create CancellationError with default message', () => {
+        const error = new CancellationError();
+        expect(error.name).toBe('CancellationError');
+        expect(error.message).toBe('Commit cancelled.');
     });
 });

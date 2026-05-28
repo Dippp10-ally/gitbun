@@ -1,3 +1,94 @@
+## [1.12.1](https://github.com/nirvik34/gitbun/compare/v1.12.0...v1.12.1) (2026-05-24)
+
+
+### Bug Fixes
+
+* **analyzer:** make path parsing and scope detection platform-safe on Windows ([0165703](https://github.com/nirvik34/gitbun/commit/0165703d22ccd8906414c508c5a1fd1d8d921f49))
+
+# [1.12.0](https://github.com/nirvik34/gitbun/compare/v1.11.0...v1.12.0) (2026-05-21)
+
+
+### Bug Fixes
+
+* preserve node:child_process real exports in staging test mock ([9e9af35](https://github.com/nirvik34/gitbun/commit/9e9af35ae601113a8b97d07785ea0b6362c2c30c))
+* propagate CancellationError through launchStagingUI catch block ([df6f4c4](https://github.com/nirvik34/gitbun/commit/df6f4c407b6fa6c77f257bbba3b85e82aa576fac))
+* use vi.hoisted to fix mock hoisting in staging tests ([a701d81](https://github.com/nirvik34/gitbun/commit/a701d81c3c3322e2e561b8389ec789fe9b582048))
+
+
+### Features
+
+* add interactive file staging UI when no files are staged ([6841ff7](https://github.com/nirvik34/gitbun/commit/6841ff72e4fc93dc6b5fa8c4ad00cdc884ace9b6)), closes [#26](https://github.com/nirvik34/gitbun/issues/26)
+
+# [1.11.0](https://github.com/nirvik34/gitbun/compare/v1.10.0...v1.11.0) (2026-05-21)
+
+
+### Bug Fixes
+
+* **config:** restore config fields and test custom prompts ([#31](https://github.com/nirvik34/gitbun/issues/31)) ([3096997](https://github.com/nirvik34/gitbun/commit/3096997e7812eb4fc278a28fc68cc79f72e50b6f))
+
+
+### Features
+
+* **config:** add customPrompt support via .gitbunrc ([#31](https://github.com/nirvik34/gitbun/issues/31)) ([0eeedba](https://github.com/nirvik34/gitbun/commit/0eeedba0d2961a1e37f63f522c73fcd1f9b5bf1a))
+
+# [1.10.0](https://github.com/nirvik34/gitbun/compare/v1.9.1...v1.10.0) (2026-05-21)
+
+
+### Bug Fixes
+
+* address PR review comments (semantic analysis safety & correctness) ([14ba674](https://github.com/nirvik34/gitbun/commit/14ba67447545b319641ebc120c466135b6e88bb1))
+
+
+### Features
+
+* **analyzer:** add semantic diff understanding for TS/JS ([b7b619e](https://github.com/nirvik34/gitbun/commit/b7b619e51bc4399d6549c25083aaa81bdd8139ea)), closes [#7](https://github.com/nirvik34/gitbun/issues/7)
+
+## [1.9.1](https://github.com/nirvik34/gitbun/compare/v1.9.0...v1.9.1) (2026-05-20)
+
+
+### Bug Fixes
+
+* replace process.exit() with custom Error throws ([#18](https://github.com/nirvik34/gitbun/issues/18)) ([80e90c4](https://github.com/nirvik34/gitbun/commit/80e90c4875d2f9be492387e2b8f80fd40fdbe61f))
+* resolve coderabbit reviews and lint warnings ([ba714ae](https://github.com/nirvik34/gitbun/commit/ba714aef11c2e4c16d898e158c3343fd529a1a2e))
+
+# [1.9.0](https://github.com/nirvik34/gitbun/compare/v1.8.0...v1.9.0) (2026-05-19)
+
+
+### Features
+
+* **cli:** add --dry-run flag to preview commit message without committing ([9640dc5](https://github.com/nirvik34/gitbun/commit/9640dc509baccd2afc65a4167a64cc6024ff9faa))
+
+# [1.8.0](https://github.com/nirvik34/gitbun/compare/v1.7.0...v1.8.0) (2026-05-19)
+
+
+### Bug Fixes
+
+* **analyzer:** address review feedback for language profiles ([ad9ba29](https://github.com/nirvik34/gitbun/commit/ad9ba296857b7cfdacd199a489be281643bdc4e9))
+
+
+### Features
+
+* **analyzer:** add modular multi-language analyzer support ([4099c52](https://github.com/nirvik34/gitbun/commit/4099c52b71ee84174018da75d899cb99f2c8cdd8))
+
+# [1.7.0](https://github.com/nirvik34/gitbun/compare/v1.6.0...v1.7.0) (2026-05-19)
+
+
+### Features
+
+* **cli:** added progress spinners ([83488ac](https://github.com/nirvik34/gitbun/commit/83488acf216cf61cfef7c19d87ec0851bc8cc3da))
+
+# [1.6.0](https://github.com/nirvik34/gitbun/compare/v1.5.1...v1.6.0) (2026-05-19)
+
+
+### Bug Fixes
+
+* harden vscode gitbun runner ([987cd54](https://github.com/nirvik34/gitbun/commit/987cd543533b2fef64ac2ab5492ac29da3b5fd27))
+
+
+### Features
+
+* add gitbun vscode extension scaffold ([97ee5ae](https://github.com/nirvik34/gitbun/commit/97ee5ae54898e100aa6c9a37e630ba8789a5d033))
+
 ## [1.5.1](https://github.com/nirvik34/gitbun/compare/v1.5.0...v1.5.1) (2026-05-18)
 
 

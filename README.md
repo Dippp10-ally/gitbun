@@ -35,6 +35,10 @@ npx gitbun
 
 ```
 
+> If no files are staged, Gitbun opens an interactive checkbox list of modified and untracked files.
+> Press `Space` to select files and `Enter` to confirm.
+> Gitbun stages your selection and continues generating the commit message.
+
 ---
 
 ## Installation
@@ -93,6 +97,14 @@ Gitbun uses [Cosmiconfig](https://github.com/cosmiconfig/cosmiconfig) to find se
   "interactive": true
 }
 
+```
+
+**Example `.gitbunrc`:**
+
+```json
+{
+  "customPrompt": "Always include the Jira ticket number in format [PROJ-123]."
+}
 ```
 
 ---

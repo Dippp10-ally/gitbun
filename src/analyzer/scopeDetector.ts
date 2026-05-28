@@ -1,17 +1,49 @@
-export function detectScope(filePaths: string[]): string {
-  const scopes: Record<string, number> = {};
+import { getLanguageProfile } from "./languageAnalyzer";
+import path from 'path';
 
-  for (const path of filePaths) {
-    const parts = path.split("/");
+function detectFileScope(
+  file: string
+): string | null {
+  const profile = getLanguageProfile(file);
 
-    const srcIndex = parts.indexOf("src");
-    if (srcIndex !== -1 && parts[srcIndex + 1]) {
-      const scope = parts[srcIndex + 1];
-      scopes[scope] = (scopes[scope] || 0) + 1;
-    }
+  if (profile) {
+    return profile.detectScope(file);
   }
 
-  if (Object.keys(scopes).length === 0) return "core";
+const normalizedFile = path.normalize(file);
+const parts = normalizedFile.split(path.sep);
 
-  return Object.entries(scopes).sort((a, b) => b[1] - a[1])[0][0];
+  const srcIndex = parts.indexOf("src");
+
+  if (
+    srcIndex !== -1 &&
+    parts[srcIndex + 1]
+  ) {
+    return parts[srcIndex + 1];
+  }
+
+  return null;
+}
+
+export function detectScope(
+  filePaths: string[]
+): string {
+  const scopes: Record<string, number> = {};
+
+  for (const file of filePaths) {
+    const scope = detectFileScope(file);
+
+    if (!scope) continue;
+
+    scopes[scope] =
+      (scopes[scope] || 0) + 1;
+  }
+
+  if (Object.keys(scopes).length === 0) {
+    return "core";
+  }
+
+  return Object.entries(scopes).sort(
+    (a, b) => b[1] - a[1]
+  )[0][0];
 }
