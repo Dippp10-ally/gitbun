@@ -30,6 +30,7 @@ interface CliOptions {
   ai?: boolean;
   model?: string;
   auto?: boolean;
+  generateOnly?: boolean;
   verbose?: boolean;
   dryRun?: boolean;
   [key: string]: unknown;
@@ -214,6 +215,12 @@ export async function run(options: CliOptions) {
     spinner.fail("Failed during analysis or generation.");
     console.error(error);
     process.exit(1);
+  }
+
+  // Hook mode: print message to stdout and exit without committing
+  if (options.generateOnly) {
+    console.log(commitMessage);
+    return;
   }
 
   // Dry run
