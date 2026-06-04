@@ -1,4 +1,4 @@
-import { callGemini } from "./gemini";
+import { callGemini, GenerateApiError } from "./gemini";
 import { ruleBasedCommit } from "./ruleBased";
 import type { CommitResult } from "./ruleBased";
 
@@ -13,7 +13,24 @@ export async function generateCommit(diff: string, mode: Mode): Promise<CommitRe
     return ruleBasedCommit(diff);
   }
 
-  return await callGemini(diff);
+  try {
+    return await callGemini(diff);
+  } catch (error) {
+    if (shouldFallbackToRuleBased(error)) {
+      return ruleBasedCommit(diff);
+    }
+
+    throw error;
+  }
 }
 
 export type { CommitResult };
+
+function shouldFallbackToRuleBased(error: unknown): boolean {
+  if (error instanceof TypeError) {
+    return true;
+  }
+
+  return error instanceof GenerateApiError
+    && ["AI_UNAVAILABLE", "CONFIGURATION_ERROR", "INVALID_RESPONSE"].includes(error.code);
+}
