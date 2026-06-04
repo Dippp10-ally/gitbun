@@ -1,3 +1,15 @@
+# [1.14.0](https://github.com/nirvik34/gitbun/compare/v1.13.1...v1.14.0) (2026-06-04)
+
+
+### Bug Fixes
+
+* address CodeRabbit review feedback ([7ea2983](https://github.com/nirvik34/gitbun/commit/7ea2983ba445a550c313f540bdf0b8bf10c95f6b))
+
+
+### Features
+
+* add git hook integration with install and uninstall commands ([1469fdb](https://github.com/nirvik34/gitbun/commit/1469fdbc8b3b5ef04c1c140c388ae9d00d41cd8e))
+
 ## [1.13.1](https://github.com/nirvik34/gitbun/compare/v1.13.0...v1.13.1) (2026-06-04)
 
 
