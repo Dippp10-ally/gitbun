@@ -1,3 +1,12 @@
+## [1.13.1](https://github.com/nirvik34/gitbun/compare/v1.13.0...v1.13.1) (2026-06-04)
+
+
+### Bug Fixes
+
+* address CodeRabbit review suggestions ([09306ac](https://github.com/nirvik34/gitbun/commit/09306ac5c9033630b69af848299929f6bf1684aa))
+* handle outside diff comments ([97b627c](https://github.com/nirvik34/gitbun/commit/97b627c5058bad87008f9ffe46af630512b2eb37))
+* **rate-limit:** harden proxy trust and cooldown handling ([0edbd5a](https://github.com/nirvik34/gitbun/commit/0edbd5a605f1f980c77c6bf44580b30483646206))
+
 # [1.13.0](https://github.com/nirvik34/gitbun/compare/v1.12.1...v1.13.0) (2026-05-28)
 
 
