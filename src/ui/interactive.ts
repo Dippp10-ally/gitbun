@@ -1,7 +1,8 @@
 import inquirer from "inquirer";
+import { colorizeCommitMessage } from "../utils/commitColors";
 
 export async function confirmCommit(message: string): Promise<string | null> {
-  console.log("\n" + message + "\n");
+  console.log("\n" + colorizeCommitMessage(message) + "\n");
 
   const { action } = await inquirer.prompt([
     {
