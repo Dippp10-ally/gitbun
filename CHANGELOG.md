@@ -1,3 +1,10 @@
+# [1.15.0](https://github.com/nirvik34/gitbun/compare/v1.14.0...v1.15.0) (2026-06-05)
+
+
+### Features
+
+* **ui:** add lightweight color formatting to commit types ([5800ce8](https://github.com/nirvik34/gitbun/commit/5800ce865c487264fd899379997aa61842cb998d))
+
 # [1.14.0](https://github.com/nirvik34/gitbun/compare/v1.13.1...v1.14.0) (2026-06-04)
 
 
